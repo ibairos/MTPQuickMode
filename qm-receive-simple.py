@@ -64,9 +64,11 @@ def main():
     payload_list = list()
 
     receiver.startListening()
-    wait_for_data(receiver)
     data = []
-    receiver.read(data, receiver.getDynamicPayloadSize())
+    while data == []:
+        wait_for_data(receiver)
+        receiver.read(data, receiver.getDynamicPayloadSize())
+
     payload_list.append(bytes(data))
     write_file(sys.argv[1], payload_list)
 

@@ -33,7 +33,7 @@ def initialize_radios(csn, ce, channel):
     radio.setPayloadSize(32)
     radio.setChannel(channel)
 
-    radio.setDataRate(NRF24.BR_2MBPS)
+    radio.setDataRate(NRF24.BR_250KBPS)
     radio.setPALevel(NRF24.PA_MIN)
     radio.setAutoAck(False)
     radio.enableDynamicPayloads()
