@@ -172,7 +172,5 @@ def main():
     print("File sent successfully")
         
 
-
-
 if __name__ == '__main__':
     main()
