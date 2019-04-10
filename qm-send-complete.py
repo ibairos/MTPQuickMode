@@ -148,7 +148,8 @@ def main():
         while not acknowledged:
             send_packet(radio, payload_list[count])
             print("Sent payload number: " + str(count))
-            
+            radio.startListening()
+
             # Did we get an ACK back?
             ack_or_timeout(radio)
             
@@ -159,6 +160,7 @@ def main():
                 if ack_received == b'1GUTACK':
                     acknowledged = True
                     count = count + 1
+            radio.stopListening()
 
     while True:
         print("Sending the FinalACK")
