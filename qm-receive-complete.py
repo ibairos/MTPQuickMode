@@ -112,7 +112,7 @@ def main():
     """ This main function initializes the radios and receives
     all the data available from the sender. """
 
-    sender = initialize_radios(0, 25, 0x70)
+    sender = initialize_radios(0, 25, 0x60)
     receiver = initialize_radios(0, 25, 0x60)
 
     sender.openWritingPipe(pipes[0])

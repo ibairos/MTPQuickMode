@@ -21,21 +21,22 @@ import crc16
 # Define the pipes that will be used to send the data from one transceiver to the other
 pipes = [[0xe7, 0xe7, 0xe7, 0xe7, 0xe7], [0xc2, 0xc2, 0xc2, 0xc2, 0xc2]]
 
+
 def initialize_radios (csn, ce, channel):
-    ''' This function initializes the radios, each
+    """ This function initializes the radios, each
     radio being the NRF24 transceivers.
     
     It gets 3 arguments, csn = Chip Select, ce = Chip Enable
-    and the channel that will be used to transmit or receive the data.'''
+    and the channel that will be used to transmit or receive the data."""
 
     radio = NRF24(GPIO, spidev.SpiDev())
     radio.begin(csn, ce)
     time.sleep(2)
-    radio.setRetries(15,15)
+    radio.setRetries(15, 15)
     radio.setPayloadSize(32)
     radio.setChannel(channel)
 
-    radio.setDataRate(NRF24.BR_2MBPS)
+    radio.setDataRate(NRF24.BR_250KBPS)
     radio.setPALevel(NRF24.PA_MIN)
     radio.setAutoAck(False)
     radio.enableDynamicPayloads()
@@ -43,9 +44,10 @@ def initialize_radios (csn, ce, channel):
 
     return radio
 
+
 def num_generator(num):
-    ''' We must ensure that we always send 2 bytes 
-    to control the frames.'''
+    """ We must ensure that we always send 2 bytes 
+    to control the frames."""
 
     num = str(num)
     if len(num) == 1:
@@ -55,10 +57,11 @@ def num_generator(num):
     else:
         print('There was a problem with the number generator')
 
+
 def ensure_crc(crc):
-    ''' In final designs it was found that some text inputs
+    """ In final designs it was found that some text inputs
     would generate crc lengths smaller than 5 (which is the usual one),
-    so this function ensures we always send 5 bytes through the antenna.'''
+    so this function ensures we always send 5 bytes through the antenna."""
 
     crc = str(crc)
     if len(crc) == 1:
@@ -74,31 +77,37 @@ def ensure_crc(crc):
     else:
         print('There was a problem with the number ensure_crc')
 
+
 def calculate_crc(chunk):
-    ''' This function calculates the CRC for the given data. '''
+    """ This function calculates the CRC for the given data. """
 
     return ensure_crc(crc16.crc16xmodem(chunk))
 
+
 def send_packet(sender, payload):
-    ''' Send the packet thorugh the sender radio. '''
+    """ Send the packet thorugh the sender radio. """
     sender.write(payload)
 
+
 def ack_or_timeout(receiver):
-    ''' This is a blocking function that waits until
-    data has been received or until the defined timeout has passed. '''
+    """ This is a blocking function that waits until
+    data has been received or until the defined timeout has passed. """
 
     timeout_starts = time.time() 
-    while (not receiver.available(pipes[0]) and (time.time() - timeout_starts) < 0.01):
+    while not receiver.available(pipes[0]) and (time.time() - timeout_starts) < 0.01:
         time.sleep(0.01)
 
-def read_file(file_path):
-    ''' Gets the provided file and reads its content as bytes,
-    after that, it stores everything in the variable payload_list,
-    which it returns. '''
 
-    if(os.path.isfile(file_path)):
+def read_file(file_path):
+    """ Gets the provided file and reads its content as bytes,
+    after that, it stores everything in the variable payload_list,
+    which it returns. """
+
+    payload_list = list()
+
+    if os.path.isfile(file_path):
         print("Loading File in: " + file_path)
-        payload_list = list()
+
         with open(file_path, 'rb') as f:
             count = 0
             while True:
@@ -117,31 +126,31 @@ def read_file(file_path):
     
     return payload_list
 
-def main():
-    ''' This main function initializes the radios and sends
-    all the data gathered from the file. '''
 
-    sender = initialize_radios (0, 25, 0x60)
-    receiver = initialize_radios (1, 16, 0x70)
+def main():
+    """ This main function initializes the radios and sends
+    all the data gathered from the file. """
+
+    sender = initialize_radios(0, 25, 0x60)
+    receiver = initialize_radios(0, 25, 0x60)
 
     sender.openWritingPipe(pipes[1])
     receiver.openReadingPipe(0, pipes[0])
 
-    #print("Sender Information")
-    #sender.printDetails()
+    print("Sender Information")
+    sender.printDetails()
 
-    #print("Receiver Information")
-    #receiver.printDetails()
+    print("Receiver Information")
+    receiver.printDetails()
     receiver.startListening()
 
     payload_list = read_file(sys.argv[1])
-    
 
     count = 0
     while count < len(payload_list):
         # send a packet to receiver
         acknowledged = False
-        while acknowledged == False:
+        while not acknowledged:
             send_packet(sender, payload_list[count])
             print("Sent payload number: " + str(count))
             
