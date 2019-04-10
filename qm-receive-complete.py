@@ -110,33 +110,29 @@ def check_crc(chunk, crc):
 
 def main():
     """ This main function initializes the radios and receives
-    all the data available from the sender. """
+    all the data available from the radio. """
 
-    sender = initialize_radios(0, 25, 0x60)
-    receiver = initialize_radios(0, 25, 0x60)
+    radio = initialize_radios(0, 25, 0x60)
 
-    sender.openWritingPipe(pipes[0])
-    receiver.openReadingPipe(0, pipes[1])
+    radio.openWritingPipe(pipes[0])
+    radio.openReadingPipe(0, pipes[1])
 
     print("Sender Information")
-    sender.printDetails()
-
-    print("Receiver Information")
-    receiver.printDetails()
+    radio.printDetails()
 
     payload_list = list()
     
-    receiver.startListening()
+    radio.startListening()
 
     out = False
     count = 0
     actual_ack = None
     while not out:
-        wait_for_data(receiver)
+        wait_for_data(radio)
 
         # recv_buffer is the array where received data will be placed
         recv_buffer = []
-        receiver.read(recv_buffer, receiver.getDynamicPayloadSize())
+        radio.read(recv_buffer, radio.getDynamicPayloadSize())
         chunk_and_ack = recv_buffer[:-5]
         ack_num = recv_buffer[-7:-5]
         crc = recv_buffer[-5:]
@@ -160,19 +156,19 @@ def main():
 
         if (actual_ack != ack_num_str) and (data_str != b'TH1SPR0GRAMSHOULDBEOVER'):
             if check_crc(chunk_and_ack, crc):
-                send_packet(sender, b'1GUTACK')
+                send_packet(radio, b'1GUTACK')
                 payload_list.append(bytes(data))
                 actual_ack = ack_num_str
                 print("Sent ACK number " + str(count))
                 count = count + 1
             else: 
-                send_packet(sender, b'1BATACK')
+                send_packet(radio, b'1BATACK')
         elif (actual_ack == ack_num_str) and (data_str != b'TH1SPR0GRAMSHOULDBEOVER'):
-            send_packet(sender, b'1GUTACK')
+            send_packet(radio, b'1GUTACK')
         elif (actual_ack != ack_num_str) and data_str == b'TH1SPR0GRAMSHOULDBEOVER':
             print("Finishing Script")
             time.sleep(0.5)
-            send_packet(sender, b'TH1SISTH3FINALACK')
+            send_packet(radio, b'TH1SISTH3FINALACK')
             out = True
 
     write_file(sys.argv[1], payload_list)

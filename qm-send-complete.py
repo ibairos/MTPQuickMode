@@ -22,7 +22,7 @@ import crc16
 pipes = [[0xe7, 0xe7, 0xe7, 0xe7, 0xe7], [0xc2, 0xc2, 0xc2, 0xc2, 0xc2]]
 
 
-def initialize_radios (csn, ce, channel):
+def initialize_radios(csn, ce, channel):
     """ This function initializes the radios, each
     radio being the NRF24 transceivers.
     
@@ -131,18 +131,13 @@ def main():
     """ This main function initializes the radios and sends
     all the data gathered from the file. """
 
-    sender = initialize_radios(0, 25, 0x60)
-    receiver = initialize_radios(0, 25, 0x60)
+    radio = initialize_radios(0, 25, 0x60)
 
-    sender.openWritingPipe(pipes[1])
-    receiver.openReadingPipe(0, pipes[0])
+    radio.openWritingPipe(pipes[1])
+    radio.openReadingPipe(0, pipes[0])
 
     print("Sender Information")
-    sender.printDetails()
-
-    print("Receiver Information")
-    receiver.printDetails()
-    receiver.startListening()
+    radio.printDetails()
 
     payload_list = read_file(sys.argv[1])
 
@@ -151,15 +146,15 @@ def main():
         # send a packet to receiver
         acknowledged = False
         while not acknowledged:
-            send_packet(sender, payload_list[count])
+            send_packet(radio, payload_list[count])
             print("Sent payload number: " + str(count))
             
             # Did we get an ACK back?
-            ack_or_timeout(receiver)
+            ack_or_timeout(radio)
             
-            if receiver.available(pipes[0]):
+            if radio.available(pipes[0]):
                 recv_buffer = []
-                receiver.read(recv_buffer, receiver.getDynamicPayloadSize())
+                radio.read(recv_buffer, radio.getDynamicPayloadSize())
                 ack_received = bytes(recv_buffer)
                 if ack_received == b'1GUTACK':
                     acknowledged = True
@@ -168,12 +163,12 @@ def main():
     while True:
         print("Sending the FinalACK")
         time.sleep(1)
-        send_packet(sender, b'TH1SPR0GRAMSHOULDBEOVER9999999')
-        ack_or_timeout(receiver)
+        send_packet(radio, b'TH1SPR0GRAMSHOULDBEOVER9999999')
+        ack_or_timeout(radio)
 
-        if receiver.available(pipes[0]):
+        if radio.available(pipes[0]):
             recv_buffer = []
-            receiver.read(recv_buffer, receiver.getDynamicPayloadSize())
+            radio.read(recv_buffer, radio.getDynamicPayloadSize())
             received = bytes(recv_buffer)
             if received == b'TH1SISTH3FINALACK':
                     break
