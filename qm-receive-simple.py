@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# Receiver part for the Quick Mode competition of Team C
+# Receiver part for the Quick Mode competition of Team B
 # This version uses STOP&WAIT with timeout if the ACK is not received
 # It also uses CRC to ensure packet integrity
-# Author: Arnau E.
-# Date: 23/10/2018
-# Version: 1.6
+# Date: 10/04/2019
+# Version: 1.0
 
 import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
@@ -22,11 +21,11 @@ pipes = [[0xe7, 0xe7, 0xe7, 0xe7, 0xe7], [0xc2, 0xc2, 0xc2, 0xc2, 0xc2]]
 
 
 def initialize_radios(csn, ce, channel):
-    ''' This function initializes the radios, each
+    """ This function initializes the radios, each
     radio being the NRF24 transceivers.
 
     It gets 3 arguments, csn = Chip Select, ce = Chip Enable
-    and the channel that will be used to transmit or receive the data.'''
+    and the channel that will be used to transmit or receive the data."""
 
     radio = NRF24(GPIO, spidev.SpiDev())
     radio.begin(csn, ce)
@@ -35,7 +34,7 @@ def initialize_radios(csn, ce, channel):
     radio.setPayloadSize(32)
     radio.setChannel(channel)
 
-    radio.setDataRate(NRF24.BR_2MBPS)
+    radio.setDataRate(NRF24.BR_250KBPS)
     radio.setPALevel(NRF24.PA_MIN)
     radio.setAutoAck(False)
     radio.enableDynamicPayloads()
@@ -48,6 +47,7 @@ def write_file(file_path, payload_list):
 
     with open(file_path, "wb") as f:
         f.write(payload_list[0])
+
 
 def wait_for_data(receiver):
     while not receiver.available(pipes[1]):
@@ -65,10 +65,11 @@ def main():
 
     receiver.startListening()
     wait_for_data(receiver)
-    data=[]
+    data = []
     receiver.read(data, receiver.getDynamicPayloadSize())
     payload_list.append(bytes(data))
     write_file(sys.argv[1], payload_list)
+
 
 if __name__ == '__main__':
     main()

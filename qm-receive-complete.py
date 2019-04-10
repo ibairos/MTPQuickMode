@@ -25,7 +25,7 @@ GPIO.setwarnings(False)
 pipes = [[0xe7, 0xe7, 0xe7, 0xe7, 0xe7], [0xc2, 0xc2, 0xc2, 0xc2, 0xc2]]
 
 
-def initialize_radios (csn, ce, channel):
+def initialize_radios(csn, ce, channel):
     """ This function initializes the radios, each
     radio being the NRF24 transceivers.
     
@@ -35,11 +35,11 @@ def initialize_radios (csn, ce, channel):
     radio = NRF24(GPIO, spidev.SpiDev())
     radio.begin(csn, ce)
     time.sleep(2)
-    radio.setRetries(15,15)
+    radio.setRetries(15, 15)
     radio.setPayloadSize(32)
     radio.setChannel(channel)
 
-    radio.setDataRate(NRF24.BR_2MBPS)
+    radio.setDataRate(NRF24.BR_250KBPS)
     radio.setPALevel(NRF24.PA_MIN)
     radio.setAutoAck(False)
     radio.enableDynamicPayloads()
@@ -64,7 +64,7 @@ def write_file(file_path, payload_list):
 
 
 def send_packet(sender, payload):
-    """ Send the packet thorugh the sender radio. """
+    """ Send the packet through the sender radio. """
 
     sender.write(payload)
 
@@ -112,17 +112,17 @@ def main():
     """ This main function initializes the radios and receives
     all the data available from the sender. """
 
-    sender = initialize_radios(1, 16, 0x70)
+    sender = initialize_radios(0, 25, 0x70)
     receiver = initialize_radios(0, 25, 0x60)
 
     sender.openWritingPipe(pipes[0])
     receiver.openReadingPipe(0, pipes[1])
 
-    # print("Sender Information")
-    # sender.printDetails()
+    print("Sender Information")
+    sender.printDetails()
 
-    # print("Receiver Information")
-    # receiver.printDetails()
+    print("Receiver Information")
+    receiver.printDetails()
 
     payload_list = list()
     
@@ -131,7 +131,7 @@ def main():
     out = False
     count = 0
     actual_ack = None
-    while out == False:
+    while not out:
         wait_for_data(receiver)
 
         # recv_buffer is the array where received data will be placed
@@ -154,7 +154,8 @@ def main():
                                             ''
                                             ''
                                             ''
-                                            '')
+                                            ''
+                                            )
         data_str = bytes(data)
 
         if (actual_ack != ack_num_str) and (data_str != b'TH1SPR0GRAMSHOULDBEOVER'):

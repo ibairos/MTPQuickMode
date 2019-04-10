@@ -1,12 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# Receiver part for the Quick Mode competition of Team C
+# Receiver part for the Quick Mode competition of Team B
 # This version uses STOP&WAIT with timeout if the ACK is not received
 # It also uses CRC to ensure packet integrity
-# Author: Arnau E.
-# Date: 23/10/2018
-# Version: 1.6
+# Date: 10/04/2019
+# Version: 1.0
 
 import RPi.GPIO as GPIO
 GPIO.setmode(GPIO.BCM)
@@ -15,15 +14,17 @@ from lib_nrf24 import NRF24
 import spidev
 import sys
 import os
+import time
 
 pipes = [[0xe7, 0xe7, 0xe7, 0xe7, 0xe7], [0xc2, 0xc2, 0xc2, 0xc2, 0xc2]]
 
+
 def initialize_radios(csn, ce, channel):
-    ''' This function initializes the radios, each
+    """ This function initializes the radios, each
     radio being the NRF24 transceivers.
 
     It gets 3 arguments, csn = Chip Select, ce = Chip Enable
-    and the channel that will be used to transmit or receive the data.'''
+    and the channel that will be used to transmit or receive the data."""
 
     radio = NRF24(GPIO, spidev.SpiDev())
     radio.begin(csn, ce)
@@ -40,19 +41,21 @@ def initialize_radios(csn, ce, channel):
 
     return radio
 
+
 def send_packet(sender, payload):
-    ''' Send the packet thorugh the sender radio. '''
+    """ Send the packet through the sender radio. """
     sender.write(payload)
 
 
 def read_file(file_path):
-    ''' Gets the provided file and reads its content as bytes,
+    """ Gets the provided file and reads its content as bytes,
     after that, it stores everything in the variable payload_list,
-    which it returns. '''
+    which it returns. """
 
-    if (os.path.isfile(file_path)):
+    payload_list = list()
+
+    if os.path.isfile(file_path):
         print("Loading File in: " + file_path)
-        payload_list = list()
         with open(file_path, 'rb') as f:
                 chunk = f.read(25)
                 payload_list.append(chunk)
@@ -63,20 +66,19 @@ def read_file(file_path):
 
 
 def main():
-    ''' This main function initializes the radios and sends
-    all the data gathered from the file. '''
+    """ This main function initializes the radios and sends
+    all the data gathered from the file. """
 
     sender = initialize_radios(0, 25, 0x60)
 
     sender.openWritingPipe(pipes[1])
 
     print("Sender Information")
-    sender.printDetails
+    sender.printDetails()
 
     payload_list = read_file(sys.argv[1])
     send_packet(sender, payload_list[0])
     print("Packet Sent ")
-
 
 
 if __name__ == '__main__':
