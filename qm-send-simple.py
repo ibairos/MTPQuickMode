@@ -69,11 +69,9 @@ def main():
     sender = initialize_radios(0, 25, 0x60)
 
     sender.openWritingPipe(pipes[1])
-    # print("Sender Information")
-    # sender.printDetails()
 
-    # print("Receiver Information")
-    # receiver.printDetails()
+    print("Sender Information")
+    sender.printDetails
 
     payload_list = read_file(sys.argv[1])
     send_packet(sender, payload_list[0])

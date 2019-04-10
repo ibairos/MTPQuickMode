@@ -58,11 +58,8 @@ def main():
     receiver = initialize_radios(0, 25, 0x60)
     receiver.openReadingPipe(0, pipes[1])
 
-    # print("Sender Information")
-    # sender.printDetails()
-
-    # print("Receiver Information")
-    # receiver.printDetails()
+    print("Receiver Information")
+    receiver.printDetails()
 
     payload_list = list()
 
