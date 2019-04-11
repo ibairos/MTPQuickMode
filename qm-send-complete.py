@@ -1,22 +1,23 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 #
-# Sender part for the Quick Mode competition of Team C
+# Sender part for the Quick Mode competition of Team B
 # This version uses STOP&WAIT with timeout if the ACK is not received
 # It also uses CRC to ensure packet integrity
-# Author: Arnau E.
-# Date: 23/10/2018
-# Version: 1.6
+# Date: 10/04/2019
+# Version: 1.0
 
 import RPi.GPIO as GPIO
-GPIO.setmode(GPIO.BCM)
-GPIO.setwarnings(False)
 from lib_nrf24 import NRF24
 import time
 import spidev
 import sys
 import os
 import crc16
+
+# Initialize GPIOs
+GPIO.setmode(GPIO.BCM)
+GPIO.setwarnings(False)
 
 # Define the pipes that will be used to send the data from one transceiver to the other
 pipes = [[0xe7, 0xe7, 0xe7, 0xe7, 0xe7], [0xc2, 0xc2, 0xc2, 0xc2, 0xc2]]
@@ -148,9 +149,9 @@ def main():
         while not acknowledged:
             send_packet(radio, payload_list[count])
             print("Sent payload number: " + str(count))
-            radio.startListening()
 
             # Did we get an ACK back?
+            radio.startListening()
             ack_or_timeout(radio)
             
             if radio.available(pipes[0]):
@@ -166,6 +167,9 @@ def main():
         print("Sending the FinalACK")
         time.sleep(1)
         send_packet(radio, b'TH1SPR0GRAMSHOULDBEOVER9999999')
+
+        # Did we get an ACK back?
+        radio.startListening()
         ack_or_timeout(radio)
 
         if radio.available(pipes[0]):
@@ -173,7 +177,8 @@ def main():
             radio.read(recv_buffer, radio.getDynamicPayloadSize())
             received = bytes(recv_buffer)
             if received == b'TH1SISTH3FINALACK':
-                    break
+                break
+        radio.stopListening()
 
     print("File sent successfully")
         

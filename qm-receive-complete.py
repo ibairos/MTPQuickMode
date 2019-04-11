@@ -74,7 +74,7 @@ def wait_for_data(receiver):
     until data is available in the receiver pipe. """
 
     while not receiver.available(pipes[1]):
-            time.sleep(0.01)
+        time.sleep(0.01)
 
 
 def ensure_crc(crc):
@@ -121,13 +121,12 @@ def main():
     radio.printDetails()
 
     payload_list = list()
-    
-    radio.startListening()
 
     out = False
     count = 0
     actual_ack = None
     while not out:
+        radio.startListening()
         wait_for_data(radio)
 
         # recv_buffer is the array where received data will be placed
@@ -154,6 +153,7 @@ def main():
                                             )
         data_str = bytes(data)
 
+        radio.stopListening()
         if (actual_ack != ack_num_str) and (data_str != b'TH1SPR0GRAMSHOULDBEOVER'):
             if check_crc(chunk_and_ack, crc):
                 send_packet(radio, b'1GUTACK')
@@ -161,7 +161,7 @@ def main():
                 actual_ack = ack_num_str
                 print("Sent ACK number " + str(count))
                 count = count + 1
-            else: 
+            else:
                 send_packet(radio, b'1BATACK')
         elif (actual_ack == ack_num_str) and (data_str != b'TH1SPR0GRAMSHOULDBEOVER'):
             send_packet(radio, b'1GUTACK')
