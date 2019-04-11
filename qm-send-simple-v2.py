@@ -102,7 +102,7 @@ def main():
         print("Sent final packet")
         send_packet(sender, b"ENDOFTRANSMISSION")
         print("Sent HASH")
-        send_packet(sender, bytes(hashlib.md5(repr(payload_list).encode('utf-8')).hexdigest()))
+        send_packet(sender, bytes(hashlib.md5(repr(payload_list)).hexdigest().encode('utf-8')))
         print("End of transmission " + str(i))
         i = i + 1
         time.sleep(0.5)
