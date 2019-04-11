@@ -77,7 +77,7 @@ def main():
             receiver.read(data, receiver.getDynamicPayloadSize())
             if bytes(data) == b"ENDOFTRANSMISSION":
                 print("Received final packet")
-                transmission_end = False
+                transmission_end = True
                 break
             else:
                 payload_list.append(bytes(data))
