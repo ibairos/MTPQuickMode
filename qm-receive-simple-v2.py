@@ -13,6 +13,7 @@ import time
 import spidev
 import sys
 import os
+import hashlib
 
 # Initialize GPIOs
 GPIO.setmode(GPIO.BCM)
@@ -69,16 +70,23 @@ def main():
     # Receiving the file
     receiver.startListening()
     transmission_end = False
+    retransmit = True
     x = 0
-    while not transmission_end:
+    while not transmission_end or retransmit:
         data = []
         while not data:
             wait_for_data(receiver)
             receiver.read(data, receiver.getDynamicPayloadSize())
             if bytes(data) == b"ENDOFTRANSMISSION":
-                print("Received final packet")
-                transmission_end = True
-                break
+                print("Received final packet. Waiting for the hash...")
+                hash_rcv = []
+                wait_for_data(receiver)
+                receiver.read(hash_rcv, receiver.getDynamicPayloadSize())
+                if bytes(hash_rcv) == bytes(hashlib.md5(payload_list)):
+                    print("HASH correct, end of transmission...")
+                    transmission_end = True
+                    retransmit = False
+                    break
             else:
                 payload_list.append(bytes(data))
                 print("Received packet number " + str(x))

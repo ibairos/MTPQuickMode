@@ -14,6 +14,7 @@ import spidev
 import sys
 import os
 import time
+import hashlib
 
 # Initialize GPIOs
 GPIO.setmode(GPIO.BCM)
@@ -86,17 +87,25 @@ def main():
     print("Radio Information")
     sender.printDetails()
 
-    # Sending the file
+    # Read file
     payload_list = read_file(sys.argv[1])
-    x = 0
-    for payload in payload_list:
-        send_packet(sender, payload)
-        print("Packet number " + str(x) + " Sent: " + str(bytes(payload)))
-        x = x + 1
 
-    # Sending the final packet
-    send_packet(sender, b"ENDOFTRANSMISSION")
-    print("End of transmission")
+    i = 0
+    while i < 10:
+        # Sending the file
+        x = 0
+        for payload in payload_list:
+            send_packet(sender, payload)
+            x = x + 1
+
+        # Sending the final packet
+        print("Sent final packet")
+        send_packet(sender, b"ENDOFTRANSMISSION")
+        print("Sent HASH")
+        send_packet(sender, bytes(hashlib.md5(payload_list)))
+        print("End of transmission " + str(i))
+        i = i + 1
+        time.sleep(0.5)
 
 
 if __name__ == '__main__':
