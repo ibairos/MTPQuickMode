@@ -61,9 +61,8 @@ def read_file(file_path):
         print("Loading File in: " + file_path)
 
         with open(file_path, 'rb') as f:
-            count = 0
             while True:
-                chunk = f.read(25)
+                chunk = f.read(32)
                 if chunk:
                     payload_list.append(chunk)
                 else:
@@ -92,7 +91,7 @@ def main():
     x = 0
     for payload in payload_list:
         send_packet(sender, payload)
-        print("Packet number " + str(x) + " Sent")
+        print("Packet number " + str(x) + " Sent: " + str(bytes(payload)))
         x = x + 1
 
     # Sending the final packet

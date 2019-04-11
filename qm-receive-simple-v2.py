@@ -48,7 +48,8 @@ def initialize_radios(csn, ce, channel):
 def write_file(file_path, payload_list):
 
     with open(file_path, "wb") as f:
-        f.write(payload_list[0])
+        for chunk in payload_list:
+            f.write(chunk)
 
 
 def wait_for_data(receiver):
@@ -76,6 +77,7 @@ def main():
             receiver.read(data, receiver.getDynamicPayloadSize())
             if bytes(data) == b"ENDOFTRANSMISSION":
                 print("Received final packet")
+                transmission_end = False
                 break
             else:
                 payload_list.append(bytes(data))
