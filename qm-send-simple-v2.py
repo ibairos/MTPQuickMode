@@ -59,11 +59,19 @@ def read_file(file_path):
 
     if os.path.isfile(file_path):
         print("Loading File in: " + file_path)
+
         with open(file_path, 'rb') as f:
-            chunk = f.read(25)
-            payload_list.append(chunk)
+            count = 0
+            while True:
+                chunk = f.read(25)
+                if chunk:
+                    payload_list.append(chunk)
+                else:
+                    break
     else:
         print("ERROR: file does not exist in PATH: " + file_path)
+
+    print("Length of the file in chunks: " + str(len(payload_list)))
 
     return payload_list
 
