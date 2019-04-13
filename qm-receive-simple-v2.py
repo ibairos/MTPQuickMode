@@ -82,9 +82,9 @@ def main():
                 hash_rcv = []
                 wait_for_data(receiver)
                 receiver.read(hash_rcv, receiver.getDynamicPayloadSize())
-                if bytes(hash_rcv).decode("utf-8") == bytes(hashlib.md5(repr(payload_list).encode('utf-8')).hexdigest().encode('utf-8')):
+                if bytes(hash_rcv) == hashlib.md5(repr(payload_list).encode('utf-8')).hexdigest().encode('utf-8'):
                     print("HASH correct, end of transmission...")
-                    transmission_end = True
+                    transmission_end = Trued
                     retransmit = False
                     break
             else:

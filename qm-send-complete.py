@@ -78,7 +78,6 @@ def ensure_crc(crc):
     else:
         print('There was a problem with the number ensure_crc')
 
-
 def calculate_crc(chunk):
     """ This function calculates the CRC for the given data. """
 
@@ -95,7 +94,7 @@ def ack_or_timeout(receiver):
     data has been received or until the defined timeout has passed. """
 
     timeout_starts = time.time() 
-    while not receiver.available(pipes[0]) and (time.time() - timeout_starts) < 0.01:
+    while not receiver.available(pipes[0]) and (time.time() - timeout_starts) < 1:
         time.sleep(0.01)
 
 
@@ -158,6 +157,7 @@ def main():
                 recv_buffer = []
                 radio.read(recv_buffer, radio.getDynamicPayloadSize())
                 ack_received = bytes(recv_buffer)
+                print("ACK available")
                 if ack_received == b'1GUTACK':
                     acknowledged = True
                     count = count + 1
