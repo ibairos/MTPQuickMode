@@ -49,6 +49,7 @@ def initialize_radios(csn, ce, channel):
 def send_packet(sender, payload):
     """ Send the packet through the sender radio. """
     sender.write(payload)
+    print("Send: " + str(payload))
 
 
 def read_file(file_path):
@@ -86,7 +87,6 @@ def main():
 
     print("Radio Information")
     sender.printDetails()
-
     # Read file
     payload_list = read_file(sys.argv[1])
 
@@ -101,7 +101,9 @@ def main():
         # Sending the final packet
         print("Sent final packet")
         send_packet(sender, b"ENDOFTRANSMISSION")
-        print("Sent HASH")
+        time.sleep(2)
+        print("Sent HASH: " + str(bytes(hashlib.md5(repr(payload_list).encode('utf-8')).hexdigest().encode('utf-8'))))
+        print("Hash without encoding: " + str(hashlib.md5(repr(payload_list).encode('utf-8')).hexdigest()))
         send_packet(sender, bytes(hashlib.md5(repr(payload_list).encode('utf-8')).hexdigest().encode('utf-8')))
         print("End of transmission " + str(i))
         i = i + 1
