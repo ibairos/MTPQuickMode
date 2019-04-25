@@ -77,19 +77,26 @@ def main():
         while not data:
             wait_for_data(receiver)
             receiver.read(data, receiver.getDynamicPayloadSize())
+            print("Received " + str(x) + " -> " + str(bytes(data)))
             if bytes(data) == b"ENDOFTRANSMISSION":
                 print("Received final packet. Waiting for the hash...")
                 hash_rcv = []
                 wait_for_data(receiver)
                 receiver.read(hash_rcv, receiver.getDynamicPayloadSize())
+                print("Hash 1: " + str(bytes(hash_rcv).decode('utf-8')))
+                print("Hash 2: " + str(hashlib.md5(repr(payload_list).encode('utf-8')).hexdigest()))
+
                 if bytes(hash_rcv) == hashlib.md5(repr(payload_list).encode('utf-8')).hexdigest().encode('utf-8'):
                     print("HASH correct, end of transmission...")
-                    transmission_end = Trued
+                    transmission_end = True
                     retransmit = False
+                    break
+                else:
+                    print("Hash incorrect, starting again...")
+                    payload_list = list()
                     break
             else:
                 payload_list.append(bytes(data))
-                print("Received packet number " + str(x))
                 x = x + 1
 
     write_file(sys.argv[1], payload_list)
